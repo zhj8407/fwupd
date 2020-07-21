@@ -23,6 +23,8 @@ apps:
   fwupd:
     command: fwupd.wrapper
     daemon: simple
+    slots:
+      - fwupd
   fwupdmgr:
     command: fwupdmgr.wrapper
     completer:
