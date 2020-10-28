@@ -10,11 +10,15 @@ Package: *\n\
 Pin: release a=unstable\n\
 Pin-Priority: 800\n\
 \n\
-Package: libflashrom-dev\n\
+Package: libgusb-dev\n\
 Pin: release a=unstable\n\
 Pin-Priority: 901\n\
 \n\
-Package: libflashrom1\n\
+Package: libgusb2\n\
+Pin: release a=unstable\n\
+Pin-Priority: 901\n\
+\n\
+Package: gir1.2-gusb-1.0\n\
 Pin: release a=unstable\n\
 Pin-Priority: 901\n'\
  > /etc/apt/preferences
