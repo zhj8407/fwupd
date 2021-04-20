@@ -1,9 +1,9 @@
 name: Continuous Integration
 on:
   push:
-    branches: [ master, 1_4_X, wip_bsd_ci ]
+    branches: [ master, 1_4_X, wip_bsd_ci, wip_bsd_ci_distversion ]
   pull_request:
-    branches: [ master, 1_4_X, wip_bsd_ci ]
+    branches: [ master, 1_4_X, wip_bsd_ci, wip_bsd_ci_distversion ]
 
 jobs:
   #   abi:
@@ -68,7 +68,10 @@ jobs:
       uses: actions/checkout@v2
     - name: Find tag
       id: tagger
-      uses: jimschubert/query-tag-action@v1
+      uses: jimschubert/query-tag-action@v2
+      with:
+        abbrev: false
+        commit-ish: HEAD
     - name: Build
       id: test
       uses: vmactions/freebsd-vm@v0.1.2
@@ -92,7 +95,7 @@ jobs:
           sed -i .old "s/#GH_TAGNAME=.*$/GH_TAGNAME=\t${GITHUB_SHA}/" Makefile
           sed -i .old "s/GH_ACCOUNT=.*$/GH_ACCOUNT=\t${GITHUB_REPOSITORY_OWNER}/" Makefile
           sed -i .old "s/GH_PROJECT=.*$/GH_PROJECT=\t${REPOSITORY_NAME}/" Makefile
-          sed -i .old "s/DISTVERSION=.*$/DISTVERSION=${{steps.tagger.outputs.tag}}/" Makefile
+          sed -i .old "s/DISTVERSION=.*$/DISTVERSION=\t${{steps.tagger.outputs.tag}}/" Makefile
           cat Makefile
           make makesum
           make package
