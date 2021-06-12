@@ -433,6 +433,17 @@ fu_thunderbolt_device_setup_controller (FuDevice *device, GError **error)
 		fu_device_add_internal_flag (device, FU_DEVICE_INTERNAL_FLAG_REPLUG_MATCH_GUID);
 	}
 
+	/* should another plugin handle this */
+	tmp = fu_device_get_plugin (device);
+	if (tmp != NULL && g_strcmp0 (tmp, "thunderbolt") != 0) {
+		g_set_error (error,
+			     FWUPD_ERROR,
+			     FWUPD_ERROR_INTERNAL,
+			     "device intended to be handled by %s plugin",
+			     tmp);
+		return FALSE;
+	}
+
 	return TRUE;
 }
 

@@ -138,3 +138,4 @@ FirmwareSizeMax=0x80000
 Flags = skips-restart,require-ac,dual-image
 Icon = thunderbolt
 InstallDuration = 46
+Plugin = dell_dock
