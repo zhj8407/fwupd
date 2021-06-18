@@ -33,7 +33,7 @@ fu_plugin_update_cleanup (FuPlugin *plugin,
 
 	/* check for a property on the *dfu* FuDevice, which is also why we
 	 * can't just rely on using FuDevice->cleanup() */
-	if (!fu_device_has_custom_flag (device, "attach-extra-reset"))
+	if (!fu_device_has_vendor_id (device, "USB:0x0B0E"))
 		return TRUE;
 	locker = fu_device_locker_new (device, error);
 	if (locker == NULL)
