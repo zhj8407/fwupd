@@ -1392,6 +1392,7 @@ fu_device_inhibit_func (void)
 
 #define TEST_FLAG_FOO	(1 << 0)
 #define TEST_FLAG_BAR	(1 << 1)
+#define TEST_FLAG_BAZ	(1 << 2)
 
 static void
 fu_device_private_flags_func (void)
@@ -1410,6 +1411,8 @@ fu_device_private_flags_func (void)
 	g_assert_cmpint (fu_device_get_private_flags (device), ==, TEST_FLAG_FOO);
 	fu_device_set_custom_flags (device, "baz");
 	g_assert_cmpint (fu_device_get_private_flags (device), ==, TEST_FLAG_FOO);
+	fu_device_add_private_flag (device, TEST_FLAG_BAZ);
+	g_assert_cmpint (fu_device_get_private_flags (device), ==, TEST_FLAG_FOO | TEST_FLAG_BAZ);
 
 	tmp = fu_device_to_string (device);
 	g_assert_cmpstr (tmp, ==,
