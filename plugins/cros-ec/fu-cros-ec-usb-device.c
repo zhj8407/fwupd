@@ -772,6 +772,7 @@ fu_cros_ec_usb_device_write_firmware (FuDevice *device,
 		gsize command_body_size = 0;
 		START_RESP start_resp;
 
+		fu_device_remove_private_flag (device, FU_CROS_EC_USB_DEVICE_FLAG_REBOOTING_TO_RO);
 		if (!fu_cros_ec_usb_device_send_subcommand  (device, subcommand, command_body,
 							     command_body_size, &response,
 							     &response_size, FALSE, error)) {
@@ -795,11 +796,18 @@ fu_cros_ec_usb_device_write_firmware (FuDevice *device,
 
 	if (fu_device_has_private_flag (device, FU_CROS_EC_USB_DEVICE_FLAG_RW_WRITTEN) && self->in_bootloader) {
 		/*
-		 * we had previously written to the rw region but somehow
-		 * ended back up here while still in bootloader; this is
-		 * a transitory state due to the fact that we have to boot
-		 * through RO to get to RW. Set another write required to
-		 * allow the RO region to auto-jump to RW
+		 * We had previously written to the rw region (while we were
+		 * booted from ro region), but somehow landed in ro again after
+		 * a reboot. Since we wrote rw already, we wanted to jump
+		 * to the new rw so we could evaluate ro.
+		 *
+		 * This is a transitory state due to the fact that we have to
+		 * boot through RO to get to RW. Set another write required to
+		 * allow the RO region to auto-jump to RW.
+		 *
+		 * Special flow: write phase skips actual write -> attach skips
+		 * send of reset command, just sets wait for replug, and
+		 * device restart status.
 		 */
 		fu_device_add_private_flag (device, FU_CROS_EC_USB_DEVICE_FLAG_SPECIAL);
 		fu_device_add_flag (device, FWUPD_DEVICE_FLAG_ANOTHER_WRITE_REQUIRED);
@@ -859,15 +867,10 @@ fu_cros_ec_usb_device_write_firmware (FuDevice *device,
 		return FALSE;
 	}
 
-	if (self->in_bootloader) {
-		if (fu_device_has_private_flag (device, FU_CROS_EC_USB_DEVICE_FLAG_RO_WRITTEN))
-			fu_device_add_private_flag (device, FU_CROS_EC_USB_DEVICE_FLAG_RW_WRITTEN);
-	} else if (fu_device_has_private_flag (device, FU_CROS_EC_USB_DEVICE_FLAG_RW_WRITTEN)) {
+	if (self->in_bootloader)
+		fu_device_add_private_flag (device, FU_CROS_EC_USB_DEVICE_FLAG_RW_WRITTEN);
+	else
 		fu_device_add_private_flag (device, FU_CROS_EC_USB_DEVICE_FLAG_RO_WRITTEN);
-	} else {
-		fu_device_remove_private_flag (device, FU_CROS_EC_USB_DEVICE_FLAG_RW_WRITTEN);
-		fu_device_add_private_flag (device, FU_CROS_EC_USB_DEVICE_FLAG_RO_WRITTEN);
-	}
 
 	/* logical XOR */
 	if (fu_device_has_private_flag (device, FU_CROS_EC_USB_DEVICE_FLAG_RW_WRITTEN) !=
@@ -924,15 +927,23 @@ fu_cros_ec_usb_device_attach (FuDevice *device, GError **error)
 {
 	FuCrosEcUsbDevice *self = FU_CROS_EC_USB_DEVICE (device);
 
+	fu_device_set_remove_delay (device, CROS_EC_REMOVE_DELAY_RE_ENUMERATE);
 	if (self->in_bootloader &&
 	    fu_device_has_private_flag (device, FU_CROS_EC_USB_DEVICE_FLAG_SPECIAL)) {
-		fu_device_set_remove_delay (device, CROS_EC_REMOVE_DELAY_RE_ENUMERATE);
+
+		/*
+		 * attach after the SPECIAL flag was set. The EC will auto-jump
+		 * from ro -> rw, so we do not need to send an explict
+		 * reset_to_ro. We just need to set for another wait for replug
+		 * as a detach + reenumeration is expected as we jump from
+		 * ro -> rw.
+		 */
+		fu_device_remove_private_flag (device, FU_CROS_EC_USB_DEVICE_FLAG_SPECIAL);
 		fu_device_set_status (device, FWUPD_STATUS_DEVICE_RESTART);
 		fu_device_add_flag (device, FWUPD_DEVICE_FLAG_WAIT_FOR_REPLUG);
 		return TRUE;
 	}
 
-	fu_device_set_remove_delay (device, CROS_EC_REMOVE_DELAY_RE_ENUMERATE);
 	if (fu_device_has_private_flag (device, FU_CROS_EC_USB_DEVICE_FLAG_RO_WRITTEN) &&
 	    !fu_device_has_private_flag (device, FU_CROS_EC_USB_DEVICE_FLAG_RW_WRITTEN)) {
 		if (!fu_cros_ec_usb_device_reset_to_ro (device, error)) {
