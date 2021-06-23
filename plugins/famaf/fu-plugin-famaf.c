@@ -25,3 +25,18 @@ fu_plugin_coldplug (FuPlugin *plugin, GError **error)
 	fu_plugin_device_add (plugin, dev);
 	return TRUE;
 }
+
+gboolean
+fu_plugin_update (FuPlugin *plugin,
+		  FuDevice *device,
+		  GBytes *blob_fw,
+		  FwupdInstallFlags flags,
+		  GError **error)
+{
+	g_debug ("update %s", (char*) g_bytes_get_data (blob_fw, NULL));
+	g_set_error (error,
+		     G_IO_ERROR,
+		     G_IO_ERROR_NOT_SUPPORTED,
+		     "this is 1h tutorial!");
+	return FALSE;
+}
