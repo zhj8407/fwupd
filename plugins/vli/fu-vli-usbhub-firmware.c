@@ -182,49 +182,49 @@ fu_vli_usbhub_firmware_parse (FuFirmware *firmware,
 		}
 		/* Q5/Q7/Q8 requires searching two addresses for offset value */
 		if (!fu_common_read_uint16_safe (buf, bufsz, 0x8018,
-            &adr_ofs,G_BIG_ENDIAN, error)) {
-            g_prefix_error (error, "failed to get Q7/Q8 offset mapping: ");
-            return FALSE;
-        }
-        /* VL819, VL821, VL822 */
+                        &adr_ofs,G_BIG_ENDIAN, error)) {
+                        g_prefix_error (error, "failed to get Q7/Q8 offset mapping: ");
+                        return FALSE;
+                }
+                /* VL819, VL821, VL822 */
 		if (tmp == 0xF0) {
 			if (!fu_common_read_uint8_safe (buf, bufsz, adr_ofs + 0x2000,
-						 	&tmp, error)) {
+                                &tmp, error)) {
 				g_prefix_error (error, "failed to get offset version: ");
 				return FALSE;
 			}
-            /* VL819 */
-            if ((tmp == 0x05) || (tmp == 0x07))
-                fwtype = tmp & 0x7;
-            else
-                fwtype = (tmp & 0x1) << 1 | (tmp & 0x2) << 1 | (tmp & 0x4) >> 2;
-            /* matching Q5/Q7/Q8 */
-            switch (fwtype) {
-            case 0x00:
-                self->device_kind = FU_VLI_DEVICE_KIND_VL822Q7;
-                break;
-            case 0x01:
-                self->device_kind = FU_VLI_DEVICE_KIND_VL822Q5;
-                break;
-            case 0x02:
-                self->device_kind = FU_VLI_DEVICE_KIND_VL822Q8;
-                break;
-            case 0x04:
-                self->device_kind = FU_VLI_DEVICE_KIND_VL821Q7;
-                break;
-            case 0x05:
-                self->device_kind = FU_VLI_DEVICE_KIND_VL819Q7;
-                break;
-            case 0x06:
-                self->device_kind = FU_VLI_DEVICE_KIND_VL821Q8;
-                break;
-            case 0x07:
-                self->device_kind = FU_VLI_DEVICE_KIND_VL819Q8;
-                break;
-            default:
-				g_prefix_error (error, "failed to match Q5/Q7/Q8 fw type: ");
-				return FALSE;
-        /* VL820 */
+                        /* VL819 */
+                        if ((tmp == 0x05) || (tmp == 0x07))
+                            fwtype = tmp & 0x7;
+                        else
+                            fwtype = (tmp & 0x1) << 1 | (tmp & 0x2) << 1 | (tmp & 0x4) >> 2;
+                        /* matching Q5/Q7/Q8 */
+                        switch (fwtype) {
+                        case 0x00:
+                                self->device_kind = FU_VLI_DEVICE_KIND_VL822Q7;
+                                break;
+                        case 0x01:
+                                self->device_kind = FU_VLI_DEVICE_KIND_VL822Q5;
+                                break;
+                        case 0x02:
+                                self->device_kind = FU_VLI_DEVICE_KIND_VL822Q8;
+                                break;
+                        case 0x04:
+                                self->device_kind = FU_VLI_DEVICE_KIND_VL821Q7;
+                                break;
+                        case 0x05:
+                                self->device_kind = FU_VLI_DEVICE_KIND_VL819Q7;
+                                break;
+                        case 0x06:
+                                self->device_kind = FU_VLI_DEVICE_KIND_VL821Q8;
+                                break;
+                        case 0x07:
+                                self->device_kind = FU_VLI_DEVICE_KIND_VL819Q8;
+                                break;
+                        default:
+                                g_prefix_error (error, "failed to match Q5/Q7/Q8 fw type: ");
+                                return FALSE;
+                /* VL820 */
 		} else {
 			if (!fu_common_read_uint8_safe (buf, bufsz, adr_ofs + 0x2000 + 0x05,
 						 	&tmp, error)) {
