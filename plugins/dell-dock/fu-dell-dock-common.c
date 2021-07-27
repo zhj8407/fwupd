@@ -74,3 +74,14 @@ fu_dell_dock_clone_updatable (FuDevice *device)
 		fu_device_remove_flag (device, FWUPD_DEVICE_FLAG_UPDATABLE);
 	}
 }
+
+void
+fu_dell_dock_inherit_parent_needs_activation (FuDevice *device)
+{
+	FuDevice *parent;
+	parent = fu_device_get_parent (device);
+	if (parent == NULL)
+		return;
+	if (fu_device_has_flag (parent, FWUPD_DEVICE_FLAG_NEEDS_ACTIVATION))
+		fu_device_add_flag (device, FWUPD_DEVICE_FLAG_NEEDS_ACTIVATION);
+}

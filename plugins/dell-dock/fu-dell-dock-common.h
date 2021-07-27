@@ -40,3 +40,4 @@ gboolean	fu_dell_dock_set_power		(FuDevice *device,
 void		 fu_dell_dock_will_replug	(FuDevice *device);
 
 void		 fu_dell_dock_clone_updatable	(FuDevice *device);
+void		 fu_dell_dock_inherit_parent_needs_activation (FuDevice *device);
