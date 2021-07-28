@@ -146,8 +146,8 @@ fu_plugin_init(FuPlugin *plugin)
 	priv->devices = g_ptr_array_new_with_free_func((GDestroyNotify)g_object_unref);
 
 	fu_plugin_set_build_hash(plugin, FU_BUILD_HASH);
-	fu_context_add_udev_subsystem(ctx, "drm"); /* used for uevent only */
-	fu_context_add_udev_subsystem(ctx, "drm_dp_aux_dev");
+	fu_plugin_add_udev_subsystem(plugin, "drm");
+	fu_plugin_add_udev_subsystem(plugin, "drm_dp_aux_dev");
 	fu_plugin_add_firmware_gtype(plugin, NULL, FU_TYPE_KINETIC_DP_FIRMWARE);
 }
 
