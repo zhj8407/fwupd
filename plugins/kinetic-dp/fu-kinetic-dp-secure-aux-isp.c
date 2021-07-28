@@ -681,8 +681,6 @@ fu_kinetic_dp_secure_aux_isp_send_fw_payload(FuKineticDpConnection *connection,
 
 	if (is_isp_secure_auth_mode) {
 		/* Send ESM and App Certificates & RSA Signatures */
-		g_debug("sending certificates... started");
-
 		ptr = (guint8 *)fw_data;
 		if (!fu_kinetic_dp_secure_aux_isp_send_payload(connection,
 							       ptr,
@@ -694,13 +692,9 @@ fu_kinetic_dp_secure_aux_isp_send_fw_payload(FuKineticDpConnection *connection,
 			g_prefix_error(error, "sending certificates failed: ");
 			return FALSE;
 		}
-
-		g_debug("sending certificates... done");
 	}
 
 	/* Send ESM code */
-	g_debug("sending ESM... started");
-
 	ptr = (guint8 *)fw_data + SPI_ESM_PAYLOAD_START;
 	if (!fu_kinetic_dp_secure_aux_isp_send_payload(
 		connection,
@@ -713,11 +707,7 @@ fu_kinetic_dp_secure_aux_isp_send_fw_payload(FuKineticDpConnection *connection,
 		return FALSE;
 	}
 
-	g_debug("sending ESM... done");
-
 	/* Send App code */
-	g_debug("sending App... started");
-
 	ptr = (guint8 *)fw_data + SPI_APP_PAYLOAD_START;
 	if (!fu_kinetic_dp_secure_aux_isp_send_payload(
 		connection,
@@ -730,11 +720,7 @@ fu_kinetic_dp_secure_aux_isp_send_fw_payload(FuKineticDpConnection *connection,
 		return FALSE;
 	}
 
-	g_debug("sending App... done");
-
 	/* Send App initialized data */
-	g_debug("sending App init data... started");
-
 	ptr = (guint8 *)fw_data + (fu_kinetic_dp_firmware_get_is_fw_esm_xip_enabled(firmware)
 				       ? SPI_APP_EXTEND_INIT_DATA_START
 				       : SPI_APP_NORMAL_INIT_DATA_START);
@@ -749,12 +735,8 @@ fu_kinetic_dp_secure_aux_isp_send_fw_payload(FuKineticDpConnection *connection,
 		return FALSE;
 	}
 
-	g_debug("sending App init data... done");
-
 	if (fu_kinetic_dp_firmware_get_cmdb_block_size(firmware)) {
 		/* Send CMDB */
-		g_debug("sending CMDB... started");
-
 		ptr = (guint8 *)fw_data + SPI_CMDB_BLOCK_START;
 		if (!fu_kinetic_dp_secure_aux_isp_send_payload(
 			connection,
@@ -766,8 +748,6 @@ fu_kinetic_dp_secure_aux_isp_send_fw_payload(FuKineticDpConnection *connection,
 			g_prefix_error(error, "sending CMDB failed: ");
 			return FALSE;
 		}
-
-		g_debug("sending CMDB... done");
 	}
 
 	/* Send Application Identifier */
@@ -782,7 +762,6 @@ fu_kinetic_dp_secure_aux_isp_send_fw_payload(FuKineticDpConnection *connection,
 		return FALSE;
 	}
 
-	g_debug("sending App ID data... done");
 	return TRUE;
 }
 
