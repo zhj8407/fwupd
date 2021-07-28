@@ -924,29 +924,27 @@ fu_kinetic_dp_secure_aux_isp_enable_aux_forward(FuKineticDpConnection *connectio
 gboolean
 fu_kinetic_dp_secure_aux_isp_disable_aux_forward(FuKineticDpConnection *connection, GError **error)
 {
-	gboolean ret;
 	guint8 status;
 	guint8 cmd_id;
 
 	if (!fu_kinetic_dp_secure_aux_isp_write_mca_oui(connection, error))
 		return FALSE;
 
-	ret = fu_kinetic_dp_secure_aux_isp_send_kt_prop_cmd(connection,
-							    KT_DPCD_CMD_DISABLE_AUX_FORWARD,
-							    1000,
-							    20,
-							    &status,
-							    error);
+	if (!fu_kinetic_dp_secure_aux_isp_send_kt_prop_cmd(connection,
+							   KT_DPCD_CMD_DISABLE_AUX_FORWARD,
+							   1000,
+							   20,
+							   &status,
+							   error))
+		return FALSE;
 
 	/* clear CMD_STATUS_REG */
 	cmd_id = KT_DPCD_CMD_STS_NONE;
-	fu_kinetic_dp_connection_write(connection,
-				       DPCD_ADDR_FLOAT_CMD_STATUS_REG,
-				       &cmd_id,
-				       sizeof(cmd_id),
-				       error);
-
-	return ret;
+	return fu_kinetic_dp_connection_write(connection,
+					      DPCD_ADDR_FLOAT_CMD_STATUS_REG,
+					      &cmd_id,
+					      sizeof(cmd_id),
+					      error);
 }
 
 gboolean
@@ -977,6 +975,8 @@ fu_kinetic_dp_secure_aux_isp_get_device_info(FuKineticDpConnection *connection,
 		dev_info->is_dual_bank_supported = TRUE;
 		dev_info->flash_bank_idx =
 		    fu_kinetic_dp_secure_aux_isp_get_flash_bank_idx(connection, error);
+		if (dev_info->flash_bank_idx == BANK_NONE)
+			return FALSE;
 	}
 
 	dev_info->fw_info.boot_code_ver = 0;
@@ -994,7 +994,6 @@ fu_kinetic_dp_secure_aux_isp_start_isp(FuKineticDpDevice *self,
 				       GError **error)
 {
 	FuKineticDpFirmware *firmware_self = FU_KINETIC_DP_FIRMWARE(firmware);
-	gboolean ret = FALSE;
 	gboolean is_app_mode = (KT_FW_STATE_RUN_APP == dev_info->fw_run_state) ? TRUE : FALSE;
 	const guint8 *payload_data;
 	gsize payload_len;
@@ -1056,13 +1055,12 @@ fu_kinetic_dp_secure_aux_isp_start_isp(FuKineticDpDevice *self,
 		goto SECURE_AUX_ISP_END;
 
 	/* install FW images */
-	ret = fu_kinetic_dp_secure_aux_isp_install_fw_images(connection, error);
+	if (!fu_kinetic_dp_secure_aux_isp_install_fw_images(connection, error))
+		return FALSE;
 
 SECURE_AUX_ISP_END:
 	/* send reset command */
-	fu_kinetic_dp_secure_aux_isp_send_reset_command(connection, error);
-
-	return ret;
+	return fu_kinetic_dp_secure_aux_isp_send_reset_command(connection, error);
 }
 
 gboolean
