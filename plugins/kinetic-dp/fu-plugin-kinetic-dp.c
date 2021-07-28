@@ -139,7 +139,6 @@ fu_plugin_update(FuPlugin *plugin,
 void
 fu_plugin_init(FuPlugin *plugin)
 {
-	FuContext *ctx = fu_plugin_get_context(plugin);
 	FuPluginData *priv = fu_plugin_alloc_data(plugin, sizeof(FuPluginData));
 
 	/* devices added by this plugin */
